@@ -126,7 +126,12 @@
 			},
 
 			toJSON: function(model) {
-				return model.collection.toJSON();
+				if (model.collection) { // From add and remove, this will be a model
+					return model.collection.toJSON();
+				}
+				else {
+					return model.toJSON();
+				}
 			}
 		};
 
