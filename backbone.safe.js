@@ -87,7 +87,7 @@
 			// get which storage should be use
 			storageType = config.safe.type ? config.safe.type : 'local';
 			
-			Backbone.Safe.create(storageKey, storageType, this, config.safe.options || { reload: true });
+			Backbone.Safe.create(storageKey, this, storageType, config.safe.options || { reload: true });
 		}
 	}
 	// extend Model & Collection constructor to handle safe initialization
@@ -96,7 +96,7 @@
 	var collectionSafePlugin = new BackboneExtender(Backbone.Collection, [ SafePlug ]);
 
 
-	Backbone.Safe = function(uniqueID, type, context, options) {
+	Backbone.Safe = function(uniqueID, context, type, options) {
 
 		// parsing options settings
 		this._reload = options && options.reload && options.reload === true;
@@ -238,9 +238,9 @@
 	};
 
 	// factory method
-	Backbone.Safe.create = function( uniqueID, type, context, options) {
+	Backbone.Safe.create = function( uniqueID, context, type, options) {
 		if (uniqueID && context) {
-			context.safe = new Backbone.Safe(uniqueID, type, context, options);
+			context.safe = new Backbone.Safe(uniqueID, context, type, options);
 		}
 	};
 
