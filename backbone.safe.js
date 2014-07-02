@@ -1,5 +1,5 @@
 /**
- * Safe - support for storing Backbone.Model to localstorage
+ * Safe - support for storing Backbone.Model to localstorage/sessionstorage
  * 		  using the 'set' method of Model
  *
  * @constructor - use the key 'safe' to define unique storage key for backbone safe
@@ -25,7 +25,7 @@
  * @param {string} uniqueID - the name of the storage you'de like to use
  * @param {object} context  - the Backbone.Model instance reference
  * @param {object} options - (optional) configuration for setting up various features
- *						 - {boolean} reload - true to reload (before initialize) data from local sotrage if exists
+ *						 - {boolean} reload - true to reload (before initialize) data from local/session storage if exists
  *
  * @author Oren Farhi, http://orizens.com
  *
@@ -76,15 +76,18 @@
 	};
 
 	var SafePlug = function (config, args) {
-		var storageKey;
+		var storageKey,
+			storageType;
 			
 		// create safe if exist as key
 		if (config && config.safe) {
 			
 			// handle key, value safe
 			storageKey = config.safe.key ? config.safe.key : config.safe;
+			// get which storage should be use
+			storageType = config.safe.type ? config.safe.type : 'local';
 			
-			Backbone.Safe.create(storageKey, this, config.safe.options || { reload: true });
+			Backbone.Safe.create(storageKey, storageType, this, config.safe.options || { reload: true });
 		}
 	}
 	// extend Model & Collection constructor to handle safe initialization
@@ -93,12 +96,13 @@
 	var collectionSafePlugin = new BackboneExtender(Backbone.Collection, [ SafePlug ]);
 
 
-	Backbone.Safe = function(uniqueID, context, options) {
+	Backbone.Safe = function(uniqueID, type, context, options) {
 
 		// parsing options settings
 		this._reload = options && options.reload && options.reload === true;
 
 		this.uid = uniqueID;
+		this.type = type;
 		this.context = context;
 		this.isCollection = context.models && context.add;
 
@@ -106,7 +110,7 @@
 		var collection = {
 			
 			// events that Safe is listening in order to
-			// trigger save to local storage
+			// trigger save to storage
 			events: 'add reset change sort',
 
 			// the value to be used when cleaning the safe
@@ -162,7 +166,7 @@
 		this.ensureUID();
 
 		// These are the lines that are responsible for
-		// loading the saved data from the local storage to the model
+		// loading the saved data from the storage to the model
 		//
 		// the data is loaded before the Safe binds to change events
 		// storage exist ? -> save to model
@@ -182,7 +186,7 @@
 	Backbone.Safe.prototype = {
 		
 		/**
-		 * creates a local storage item with the provided
+		 * creates a storage item with the provided
 		 * UID if not exist
 		 */
 		ensureUID: function() {
@@ -204,7 +208,7 @@
 		},
 
 		storage: function() {
-			return localStorage;
+			return this.type == 'session' ? sessionStorage :  localStorage;
 		},
 
 		/**
