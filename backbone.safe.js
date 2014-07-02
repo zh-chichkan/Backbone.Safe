@@ -238,9 +238,9 @@
 	};
 
 	// factory method
-	Backbone.Safe.create = function( uniqueID, context, options) {
+	Backbone.Safe.create = function( uniqueID, type, context, options) {
 		if (uniqueID && context) {
-			context.safe = new Backbone.Safe(uniqueID, context, options);
+			context.safe = new Backbone.Safe(uniqueID, type, context, options);
 		}
 	};
 
