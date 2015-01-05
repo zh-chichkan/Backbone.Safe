@@ -183,7 +183,7 @@
 		// attach Backbone custom methods
 		_.extend(context, _.pick(this, ['fetch']));
 		// listen to any change event and cache it
-		this.debouncedStore = _.debounce(_.bind(this.store, this), 400);
+		this.debouncedStore = _.debounce(_.bind(this.store, this), 75);
 		context.on(this.events, this.debouncedStore, this);
 		// adding destroy handler
 		context.on('destroy', this.destroy, this);
