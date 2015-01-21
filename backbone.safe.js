@@ -116,14 +116,14 @@
 			// the value to be used when cleaning the safe
 			emptyValue: '[]',
 
-			reload: function() {
-				context.add(this.getData());
+			reload: function(options) {
+				context.add(this.getData(), options);
 			},
 
 			fetch: function(options) {
 				var fetchFromSafe = options && options.from;
 				if (fetchFromSafe && fetchFromSafe === "safe") {
-					this.safe.reload();
+					this.safe.reload(options);
 				} else {
 					Backbone.Collection.prototype.fetch.apply(this, arguments);
 				}
@@ -145,15 +145,15 @@
 
 			emptyValue: '{}',
 
-			reload: function() {
-				context.set(this.getData());
+			reload: function(options) {
+				context.set(this.getData(), options);
 			},
 
 			// options = { from: "safe" }
 			fetch: function (options) {
 				var fetchFromSafe = options && options.from;
 				if (fetchFromSafe && fetchFromSafe === "safe") {
-					this.safe.reload();
+					this.safe.reload(options);
 				} else {
 					Backbone.Model.prototype.fetch.apply(this, arguments);
 				}
