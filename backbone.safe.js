@@ -111,7 +111,7 @@
 			
 			// events that Safe is listening in order to
 			// trigger save to storage
-			events: 'add reset change sort remove',
+			events: 'add reset change sort',
 
 			// the value to be used when cleaning the safe
 			emptyValue: '[]',
