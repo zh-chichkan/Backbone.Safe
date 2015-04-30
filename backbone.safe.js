@@ -224,7 +224,11 @@
 		getData: function() {
 			// JSON.parse can't be run with an empty string
 			this._current = this.storage().getItem(this.uid);
-			return this._current ? JSON.parse(this._current) : this._current;
+			try {
+				return this._current ? JSON.parse(this._current) : this._current;
+			} catch (e) {
+				return {};
+			}
 		},
 
 		// set the local storage key to the empty value
