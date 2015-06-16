@@ -105,6 +105,7 @@
 		this.type = type;
 		this.context = context;
 		this.isCollection = context.models && context.add;
+		this.maxCollectionLength = options ? (options.maxCollectionLength || false) : false; 
 
 		// mixins for collection and model
 		var collection = {
@@ -130,17 +131,24 @@
 			},
 
 			toJSON: function(model) {
+				var data;
+
 				if (model.collection) { // From add and remove, this will be a model
-					return model.collection.toJSON();
+					data = model.collection.toJSON();
 				}
 				else {
-					return model.toJSON();
+					data = model.toJSON();
 				}
+
+				if (this.maxCollectionLength) {
+					data = data.slice(-this.maxCollectionLength);
+				}
+
+				return data;
 			}
 		};
 
-		var model = {
-
+		var model = { 
 			events: 'change',
 
 			emptyValue: '{}',
