@@ -112,7 +112,7 @@
 			
 			// events that Safe is listening in order to
 			// trigger save to storage
-			events: 'add reset change sort dump',
+			events: 'add reset change sort remove',
 
 			// the value to be used when cleaning the safe
 			emptyValue: '[]',
@@ -191,7 +191,7 @@
 		// attach Backbone custom methods
 		_.extend(context, _.pick(this, ['fetch']));
 		// listen to any change event and cache it
-		this.debouncedStore = _.throttle(_.bind(this.store, this), 75);
+		this.debouncedStore = _.throttle(_.bind(this.store, this, context), 75);
 		context.on(this.events, this.debouncedStore, this);
 		// adding destroy handler
 		context.on('destroy', this.destroy, this);
