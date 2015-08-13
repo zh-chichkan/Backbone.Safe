@@ -210,15 +210,27 @@
 		},
 
 		create: function() {
-			this.storage().setItem(this.uid, this.emptyValue);
+		  try {
+				this.storage().setItem(this.uid, this.emptyValue);
+			} catch (e) {
+				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
+	        this.context.trigger('safeQuotaError');
+	      }
+			}
 		},
 
 		/*
 		 * @bbDataObj {collection/model}
 		 */
 		store: function(bbDataObj) {
-			this.storage()
-				.setItem(this.uid, JSON.stringify( this.toJSON( bbDataObj )));
+			try {
+				this.storage()
+					.setItem(this.uid, JSON.stringify( this.toJSON( bbDataObj )));
+			} catch (e) {
+				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
+	        this.context.trigger('safeQuotaError');
+	      }
+			}
 		},
 
 		storage: function() {
