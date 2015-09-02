@@ -29,13 +29,18 @@
  *
  * @author Oren Farhi, http://orizens.com
  *
- * @version 0.3
+ * @version 0.6.0
  *
  */
-(function(){
-
-	var _ = this._;
-	var Backbone = this.Backbone;
+(function (global, factory) {
+  if (typeof exports === "object" && typeof module !== 'undefined') {
+  	module.exports = factory(require("underscore"), require("backbone"));
+  } else if (typeof define === "function" && define.amd) {
+  	define(["underscore", "backbone"], factory);
+  } else {
+  	global.Backbone.Safe = factory(global._, global.Backbone);
+  }
+})(this, function (_, Backbone) {
 	
 	// if Underscore or Backbone have not been loaded
 	// exit to prevent js errors
@@ -269,4 +274,6 @@
 		}
 	};
 
-})();
+	return Backbone.Safe;
+
+});

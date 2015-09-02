@@ -1,0 +1,26 @@
+{
+  "name": "backbone.safe",
+  "version": "0.6.0",
+  "description": "Backbone.Safe is a plugin for Backbone.js which stores a model's or a collection's json data to the local storage on set operations, regardless server side existance.\r The concept for Backbone.Safe has been created while the developing the [Echoes Player project](https://github.com/orizens/echoes).\r ## Install",
+  "main": "backbone.safe.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fer0x/Backbone.Safe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fer0x/Backbone.Safe/issues"
+  },
+  "homepage": "https://github.com/Fer0x/Backbone.Safe#readme",
+  "dependencies": {
+    "backbone": "1.0.0 - 1.2.2",
+    "underscore": "1.4.4 - 1.8.3"
+  }
+}
