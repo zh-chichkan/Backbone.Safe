@@ -220,6 +220,10 @@
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
 	        this.context.trigger('safeQuotaError');
+
+	       	setTimeout(_.bind(function() {
+	        	this.create();
+	        }, this), 300);
 	      }
 			}
 		},
@@ -234,6 +238,10 @@
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
 	        this.context.trigger('safeQuotaError');
+
+	        setTimeout(_.bind(function() {
+	        	this.store(bbDataObj);
+	        }, this), 300);
 	      }
 			}
 		},
