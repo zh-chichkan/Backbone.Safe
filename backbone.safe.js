@@ -48,6 +48,9 @@
 		return;
 	}
 
+	var STORE_DEBOUNCE_DELAY = 100;
+	var STORE_AFTER_QUOTA_ERROR_DELAY = 700;
+
 	// factory for creating extend replacement for Backbone Objects
 	function BackboneExtender(bbObject, plugins) {
 		var thisExtender = this;
@@ -196,7 +199,7 @@
 		// attach Backbone custom methods
 		_.extend(context, _.pick(this, ['fetch']));
 		// listen to any change event and cache it
-		this.debouncedStore = _.throttle(_.bind(this.store, this, context), 75);
+		this.debouncedStore = _.throttle(_.bind(this.store, this, context), STORE_DEBOUNCE_DELAY);
 		context.on(this.events, this.debouncedStore, this);
 		// adding destroy handler
 		context.on('destroy', this.destroy, this);
@@ -223,7 +226,7 @@
 
 	       	setTimeout(_.bind(function() {
 	        	this.create();
-	        }, this), 300);
+	        }, this), STORE_AFTER_QUOTA_ERROR_DELAY);
 	      }
 			}
 		},
@@ -241,7 +244,7 @@
 
 	        setTimeout(_.bind(function() {
 	        	this.store(bbDataObj);
-	        }, this), 300);
+	        }, this), STORE_AFTER_QUOTA_ERROR_DELAY);
 	      }
 			}
 		},
