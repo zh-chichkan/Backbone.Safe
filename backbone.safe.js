@@ -48,8 +48,9 @@
 		return;
 	}
 
-	var STORE_DEBOUNCE_DELAY = 100;
+	var STORE_DEBOUNCE_DELAY = 250;
 	var STORE_AFTER_QUOTA_ERROR_DELAY = 700;
+	var DEBUG = false;
 
 	// factory for creating extend replacement for Backbone Objects
 	function BackboneExtender(bbObject, plugins) {
@@ -199,8 +200,8 @@
 		// attach Backbone custom methods
 		_.extend(context, _.pick(this, ['fetch']));
 		// listen to any change event and cache it
-		this.debouncedStore = _.throttle(_.bind(this.store, this, context), STORE_DEBOUNCE_DELAY);
-		context.on(this.events, this.debouncedStore, this);
+		this.delayedOnChange = _.throttle(this.onChange.bind(this, context), STORE_DEBOUNCE_DELAY);
+		context.on(this.events, this.delayedOnChange, this);
 		// adding destroy handler
 		context.on('destroy', this.destroy, this);
 	};
@@ -224,9 +225,9 @@
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
 	        this.context.trigger('safeQuotaError');
 
-	       	setTimeout(_.bind(function() {
+	        setTimeout(function() {
 	        	this.create();
-	        }, this), STORE_AFTER_QUOTA_ERROR_DELAY);
+	        }.bind(this), STORE_AFTER_QUOTA_ERROR_DELAY);
 	      }
 			}
 		},
@@ -234,17 +235,26 @@
 		/*
 		 * @bbDataObj {collection/model}
 		 */
-		store: function(bbDataObj) {
+		onChange: function(bbDataObj) {
+			this.debug('Store called.', this.uid);
+
+			this.store(JSON.stringify( this.toJSON( bbDataObj )));
+		},
+
+		store: function(str) {
 			try {
 				this.storage()
-					.setItem(this.uid, JSON.stringify( this.toJSON( bbDataObj )));
+					.setItem(this.uid, str);
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
-	        this.context.trigger('safeQuotaError');
+	        this.context.trigger('safeQuotaError', this.getUsedSpace());
+	        this.debug('Quota error', this.getUsedSpace());
 
-	        setTimeout(_.bind(function() {
-	        	this.store(bbDataObj);
-	        }, this), STORE_AFTER_QUOTA_ERROR_DELAY);
+	        setTimeout(function() {
+            this.debug('Retry call store.', this.uid);
+
+            this.store(str);
+	        }.bind(this), STORE_AFTER_QUOTA_ERROR_DELAY);
 	      }
 			}
 		},
@@ -275,7 +285,25 @@
 		// removes the key from the localstorage
 		destroy: function() {
 			this.storage().removeItem( this.uid );
-		}
+		},
+
+		debug: function() {
+			if (DEBUG) {
+				console.info.apply(console, ['[Backbone.Safe]']
+					.concat(Array.prototype.slice.call(arguments)));
+			}
+		},
+
+		getUsedSpace: function(){
+      var allStrings = '';
+      var storage = this.storage();
+      for(var key in storage){
+        if(storage.hasOwnProperty(key)){
+          allStrings += storage[key];
+        }
+      }
+      return allStrings ? 3 + ((allStrings.length*16)/(8*1024)) : 0;
+    }
 	};
 
 	// factory method
@@ -284,6 +312,10 @@
 			context.safe = new Backbone.Safe(uniqueID, context, type, options);
 		}
 	};
+
+	Backbone.Safe.enableDebug = function() {
+		DEBUG = true;
+	}
 
 	return Backbone.Safe;
 
