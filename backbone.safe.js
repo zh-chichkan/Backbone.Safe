@@ -106,7 +106,6 @@
 
 
 	Backbone.Safe = function(uniqueID, context, type, options) {
-
 		// parsing options settings
 		this._reload = options && options.reload && options.reload === true;
 
@@ -206,6 +205,8 @@
 		context.on('destroy', this.destroy, this);
 	};
 
+  _.extend(Backbone.Safe, Backbone.Events);
+
 	Backbone.Safe.prototype = {
 		
 		/**
@@ -223,7 +224,7 @@
 				this.storage().setItem(this.uid, this.emptyValue);
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
-	        this.context.trigger('safeQuotaError');
+	        Backbone.Safe.trigger('quotaError');
 
 	        setTimeout(function() {
 	        	this.create();
@@ -247,7 +248,7 @@
 					.setItem(this.uid, str);
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
-	        this.context.trigger('safeQuotaError', this.getUsedSpace());
+	        Backbone.Safe.trigger('quotaError', this.getUsedSpace());
 	        this.debug('Quota error', this.getUsedSpace());
 
 	        setTimeout(function() {
