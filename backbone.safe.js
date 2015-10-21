@@ -29,7 +29,7 @@
  *
  * @author Oren Farhi, http://orizens.com
  *
- * @version 0.6.3
+ * @version 0.6.2
  *
  */
 (function (global, factory) {
