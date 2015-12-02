@@ -248,8 +248,8 @@
 					.setItem(this.uid, str);
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
-	        Backbone.Safe.trigger('quotaError', this.getUsedSpace());
-	        this.debug('Quota error', this.getUsedSpace());
+	        Backbone.Safe.trigger('quotaError');
+	        this.debug('Quota error');
 
 	        setTimeout(function() {
             this.debug('Retry call store.', this.uid);
@@ -293,18 +293,8 @@
 				console.info.apply(console, ['[Backbone.Safe]']
 					.concat(Array.prototype.slice.call(arguments)));
 			}
-		},
+		}
 
-		getUsedSpace: function(){
-      var allStrings = '';
-      var storage = this.storage();
-      for(var key in storage){
-        if(storage.hasOwnProperty(key)){
-          allStrings += storage[key];
-        }
-      }
-      return allStrings ? 3 + ((allStrings.length*16)/(8*1024)) : 0;
-    }
 	};
 
 	// factory method
