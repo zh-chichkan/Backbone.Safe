@@ -11,16 +11,16 @@
  *
  * 					// advanced defintion for safe with options
  *	  			Backbone.Model.extend({
- *	  			
+ *
  *		 				safe: {
  *		 					key: 'my-unique-key',
  *		 					options: {
  *		 						reload: true
  *		 					}
- *		 				}	
- * 
+ *		 				}
+ *
  *	  			})
- * 
+ *
  * @requires Backbone.js, Underscore.js
  * @param {string} uniqueID - the name of the storage you'de like to use
  * @param {object} context  - the Backbone.Model instance reference
@@ -33,22 +33,22 @@
  *
  */
 (function (global, factory) {
-  if (typeof exports === "object" && typeof module !== 'undefined') {
-  	module.exports = factory(require("underscore"), require("backbone"));
-  } else if (typeof define === "function" && define.amd) {
-  	define(["underscore", "backbone"], factory);
-  } else {
-  	global.Backbone.Safe = factory(global._, global.Backbone);
-  }
+	if (typeof exports === "object" && typeof module !== 'undefined') {
+		module.exports = factory(require("underscore"), require("backbone"));
+	} else if (typeof define === "function" && define.amd) {
+		define(["underscore", "backbone"], factory);
+	} else {
+		global.Backbone.Safe = factory(global._, global.Backbone);
+	}
 })(this, function (_, Backbone) {
-	
+
 	// if Underscore or Backbone have not been loaded
 	// exit to prevent js errors
 	if (!_ || !Backbone || !JSON) {
 		return;
 	}
 
-	var STORE_DEBOUNCE_DELAY = 250;
+	var STORE_DEBOUNCE_DELAY = 500;
 	var STORE_AFTER_QUOTA_ERROR_DELAY = 700;
 	var DEBUG = false;
 
@@ -87,15 +87,15 @@
 	var SafePlug = function (config, args) {
 		var storageKey,
 			storageType;
-			
+
 		// create safe if exist as key
 		if (config && config.safe) {
-			
+
 			// handle key, value safe
 			storageKey = config.safe.key ? config.safe.key : config.safe;
 			// get which storage should be use
 			storageType = config.safe.type ? config.safe.type : 'local';
-			
+
 			Backbone.Safe.create(storageKey, this, storageType, config.safe.options || { reload: true });
 		}
 	}
@@ -113,11 +113,11 @@
 		this.type = type;
 		this.context = context;
 		this.isCollection = context.models && context.add;
-		this.maxCollectionLength = options ? (options.maxCollectionLength || false) : false; 
+		this.maxCollectionLength = options ? (options.maxCollectionLength || false) : false;
 
 		// mixins for collection and model
 		var collection = {
-			
+
 			// events that Safe is listening in order to
 			// trigger save to storage
 			events: 'add reset change sort remove',
@@ -156,7 +156,7 @@
 			}
 		};
 
-		var model = { 
+		var model = {
 			events: 'change',
 
 			emptyValue: '{}',
@@ -205,10 +205,10 @@
 		context.on('destroy', this.destroy, this);
 	};
 
-  _.extend(Backbone.Safe, Backbone.Events);
+	_.extend(Backbone.Safe, Backbone.Events);
 
 	Backbone.Safe.prototype = {
-		
+
 		/**
 		 * creates a storage item with the provided
 		 * UID if not exist
@@ -220,16 +220,16 @@
 		},
 
 		create: function() {
-		  try {
+			try {
 				this.storage().setItem(this.uid, this.emptyValue);
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
-	        Backbone.Safe.trigger('quotaError');
+					Backbone.Safe.trigger('quotaError');
 
-	        setTimeout(function() {
-	        	this.create();
-	        }.bind(this), STORE_AFTER_QUOTA_ERROR_DELAY);
-	      }
+					setTimeout(function() {
+						this.create();
+					}.bind(this), STORE_AFTER_QUOTA_ERROR_DELAY);
+				}
 			}
 		},
 
@@ -237,7 +237,13 @@
 		 * @bbDataObj {collection/model}
 		 */
 		onChange: function(bbDataObj) {
+			var options = Array.prototype.slice.call(arguments).pop();
 			this.debug('Store called.', this.uid);
+
+			if (options.noSafe) {
+				this.debug('Received option `noSafe`.', this.uid);
+				return;
+			}
 
 			this.store(JSON.stringify( this.toJSON( bbDataObj )));
 		},
@@ -248,15 +254,15 @@
 					.setItem(this.uid, str);
 			} catch (e) {
 				if (e.name == 'NS_ERROR_DOM_QUOTA_REACHED' || e.code == 22 || e.number === -2147024882) {
-	        Backbone.Safe.trigger('quotaError');
-	        this.debug('Quota error');
+					Backbone.Safe.trigger('quotaError');
+					this.debug('Quota error');
 
-	        setTimeout(function() {
-            this.debug('Retry call store.', this.uid);
+					setTimeout(function() {
+						this.debug('Retry call store.', this.uid);
 
-            this.store(str);
-	        }.bind(this), STORE_AFTER_QUOTA_ERROR_DELAY);
-	      }
+						this.store(str);
+					}.bind(this), STORE_AFTER_QUOTA_ERROR_DELAY);
+				}
 			}
 		},
 
