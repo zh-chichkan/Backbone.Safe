@@ -1,6 +1,6 @@
 {
   "name": "backbone.safe",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Backbone.Safe is a plugin for Backbone.js which stores a model's or a collection's json data to the local storage on set operations, regardless server side existance.\r The concept for Backbone.Safe has been created while the developing the [Echoes Player project](https://github.com/orizens/echoes).\r ## Install",
   "main": "backbone.safe.js",
   "directories": {
