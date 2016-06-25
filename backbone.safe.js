@@ -149,7 +149,7 @@
 				}
 
 				if (this.maxCollectionLength) {
-					data = data.slice(-this.maxCollectionLength);
+					data = data.slice(0, this.maxCollectionLength);
 				}
 
 				return data;
