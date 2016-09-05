@@ -199,7 +199,10 @@
 		// attach Backbone custom methods
 		_.extend(context, _.pick(this, ['fetch']));
 		// listen to any change event and cache it
-		this.delayedOnChange = _.throttle(this.onChange.bind(this, context), STORE_DEBOUNCE_DELAY);
+		var shouldThrottle = options && options.hasOwnProperty('throttle') ? options.throttle : true;
+		this.delayedOnChange = shouldThrottle ?
+			_.throttle(this.onChange.bind(this, context), STORE_DEBOUNCE_DELAY) :
+			this.onChange.bind(this, context);
 		context.on(this.events, this.delayedOnChange, this);
 		// adding destroy handler
 		context.on('destroy', this.destroy, this);
