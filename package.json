@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Fer0x/Backbone.Safe#readme",
   "dependencies": {
     "backbone": "1.0.0 - 1.2.2",
+    "localforage": "^1.4.3",
     "underscore": "1.4.4 - 1.8.3"
   }
 }

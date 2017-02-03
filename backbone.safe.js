@@ -34,9 +34,9 @@
  */
 (function (global, factory) {
 	if (typeof exports === "object" && typeof module !== 'undefined') {
-		module.exports = factory(require("underscore"), require("backbone"));
+		module.exports = factory(require("underscore"), require("backbone"), require("localforage"));
 	} else if (typeof define === "function" && define.amd) {
-		define(["underscore", "backbone"], factory);
+		define(["underscore", "backbone", "localforage"], factory);
 	} else {
 		global.Backbone.Safe = factory(global._, global.Backbone);
 	}
@@ -270,7 +270,7 @@
 		},
 
 		storage: function() {
-			return this.type == 'session' ? sessionStorage :  localStorage;
+			return this.type == 'session' ? sessionStorage : localforage;
 		},
 
 		/**
@@ -315,7 +315,7 @@
 
 	Backbone.Safe.enableDebug = function() {
 		DEBUG = true;
-	}
+	};
 
 	return Backbone.Safe;
 
