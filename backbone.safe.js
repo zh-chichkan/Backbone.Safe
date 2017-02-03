@@ -40,7 +40,7 @@
 	} else {
 		global.Backbone.Safe = factory(global._, global.Backbone);
 	}
-})(this, function (_, Backbone) {
+})(this, function (_, Backbone, localforage) {
 
 	// if Underscore or Backbone have not been loaded
 	// exit to prevent js errors
