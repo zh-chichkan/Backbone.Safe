@@ -126,13 +126,25 @@
 			emptyValue: '[]',
 
 			reload: function(options) {
-				context.add(this.getData(), options);
+				return this.getData().then(function(val) {
+					var current;
+
+					try {
+						current = val ? JSON.parse(val) : val;
+					} catch (e) {
+						current = {};
+					}
+
+					this._current = current;
+
+					context.add(current, options);
+				});
 			},
 
 			fetch: function(options) {
 				var fetchFromSafe = options && options.from;
 				if (fetchFromSafe && fetchFromSafe === "safe") {
-					this.safe.reload(options);
+					return this.safe.reload(options);
 				} else {
 					Backbone.Collection.prototype.fetch.apply(this, arguments);
 				}
@@ -162,14 +174,26 @@
 			emptyValue: '{}',
 
 			reload: function(options) {
-				context.set(this.getData(), options);
+				return this.getData().then(function(val) {
+					var current;
+
+					try {
+						current = val ? JSON.parse(val) : val;
+					} catch (e) {
+						current = {};
+					}
+
+					this._current = current;
+
+					context.set(current, options);
+				});
 			},
 
 			// options = { from: "safe" }
 			fetch: function (options) {
 				var fetchFromSafe = options && options.from;
 				if (fetchFromSafe && fetchFromSafe === "safe") {
-					this.safe.reload(options);
+					return this.safe.reload(options);
 				} else {
 					Backbone.Model.prototype.fetch.apply(this, arguments);
 				}
@@ -211,7 +235,6 @@
 	_.extend(Backbone.Safe, Backbone.Events);
 
 	Backbone.Safe.prototype = {
-
 		/**
 		 * creates a storage item with the provided
 		 * UID if not exist
@@ -279,12 +302,7 @@
 		 */
 		getData: function() {
 			// JSON.parse can't be run with an empty string
-			this._current = this.storage().getItem(this.uid);
-			try {
-				return this._current ? JSON.parse(this._current) : this._current;
-			} catch (e) {
-				return {};
-			}
+			return this.storage().getItem(this.uid);
 		},
 
 		// set the local storage key to the empty value
