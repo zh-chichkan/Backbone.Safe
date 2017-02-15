@@ -161,7 +161,7 @@
 				}
 
 				if (this.maxCollectionLength) {
-					data = data.slice(0, data.length - this.maxCollectionLength);
+					data = data.slice(data.length - this.maxCollectionLength);
 				}
 
 				return data;
