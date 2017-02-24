@@ -98,7 +98,7 @@
 
 			Backbone.Safe.create(storageKey, this, storageType, config.safe.options || { reload: true });
 		}
-	}
+	};
 	// extend Model & Collection constructor to handle safe initialization
 	// Backbone.Model.extend = _.wrap(Backbone.Model.extend, BackboneExtender)
 	var modelSafePlugin = new BackboneExtender(Backbone.Model, [ SafePlug ]);
@@ -114,6 +114,8 @@
 		this.context = context;
 		this.isCollection = context.models && context.add;
 		this.maxCollectionLength = options ? (options.maxCollectionLength || false) : false;
+		//TODO
+		//this.ignoredFilter
 
 		// mixins for collection and model
 		var collection = {
@@ -126,19 +128,23 @@
 			emptyValue: '[]',
 
 			reload: function(options) {
+				var _current = [];
+
 				return this.getData().then(function(val) {
-					var current;
+					var all = [];
+					var current = Array.isArray(val) ? val : [];
 
-					try {
-						current = val ? JSON.parse(val) : val;
-					} catch (e) {
-						current = {};
-					}
 
-					this._current = current;
+					current.forEach(function (value) {
+						all.push(this.storage().getItem(this.uid + '_' + value));
+					}, this);
 
-					context.add(current, options);
-				});
+					return Promise.all(all).then(function(resolve) {
+						this._current = resolve;
+
+						context.add(resolve, options);
+					}.bind(this));
+				}.bind(this));
 			},
 
 			fetch: function(options) {
@@ -154,9 +160,8 @@
 				var data;
 
 				if (model.collection) { // From add and remove, this will be a model
-					data = model.collection.toJSON();
-				}
-				else {
+					data = model.collection;
+				} else {
 					data = model.toJSON();
 				}
 
@@ -227,7 +232,20 @@
 		this.delayedOnChange = shouldThrottle ?
 			_.throttle(this.onChange.bind(this, context), STORE_DEBOUNCE_DELAY) :
 			this.onChange.bind(this, context);
-		context.on(this.events, this.delayedOnChange, this);
+
+		if (this.isCollection) {
+			this.storage().getItem(this.uid).then(function(resolve) {
+				this[this.uid] = Array.isArray(resolve) ? resolve : [];
+
+				context.on('add', this.onAdd.bind(this, context),  this);
+				context.on('change', this.onCollectionChange.bind(this, context), this);
+				context.on('reset', this.onReset.bind(this, context), this);
+				context.on('sort', this.onSort.bind(this, context), this);
+				context.on('remove', this.onRemove.bind(this, context), this);
+			}.bind(this));
+		} else {
+			context.on(this.events, this.delayedOnChange, this);
+		}
 		// adding destroy handler
 		context.on('destroy', this.destroy, this);
 	};
@@ -272,6 +290,46 @@
 			}
 
 			this.store(JSON.stringify( this.toJSON( bbDataObj )));
+		},
+
+		onAdd: function (bbDataObj, model, colection, options) {
+			if (this[this.uid].indexOf(model.cid) === -1) {
+				this.storage().setItem(this.uid + '_' + model.cid, model.attributes).then(function(value) {
+					this[this.uid].push(model.cid);
+
+					this.storage().setItem(this.uid, this[this.uid]);
+				}.bind(this));
+			}
+		},
+
+		onCollectionChange: function(bbDataObj, model, option) {
+			if (this[this.uid].indexOf(model.cid) !== -1) {
+				this.storage().setItem(this.uid + '_' + model.cid, model.attributes).then(function(value) {
+
+					this.storage().setItem(this.uid, this[this.uid]);
+				}.bind(this));
+			}
+		},
+
+		onReset: function(bbDataObj, model, option) {
+			this.storage().setItem(this.uid + '_' + model.cid, model.attributes);
+		},
+
+		onSort: function(bbDataObj, collection, option) {
+			this[this.uid] = collection.models.map(function (model) { return model.cid; });
+			this.storage().setItem(this.uid, this[this.uid]);
+		},
+
+		onRemove: function(bbDataObj, model, collection, option) {
+			var index = this[this.uid].indexOf(model.cid);
+
+			this.storage().removeItem(this.uid + '_' + model.cid).then(function(value) {
+				if (index !== -1) {
+					this[this.uid].splice(index, 1);
+
+					this.storage().setItem(this.uid, this[this.uid]);
+				}
+			}.bind(this));
 		},
 
 		store: function(str) {
@@ -325,7 +383,7 @@
 	};
 
 	// factory method
-	Backbone.Safe.create = function( uniqueID, context, type, options) {
+	Backbone.Safe.create = function(uniqueID, context, type, options) {
 		if (uniqueID && context) {
 			context.safe = new Backbone.Safe(uniqueID, context, type, options);
 		}
